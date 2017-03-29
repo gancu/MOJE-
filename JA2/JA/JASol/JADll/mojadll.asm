@@ -32,9 +32,10 @@ FindChar_1 PROC
     MOV ESI, OFFSET DataString	; zaladuj offset zmiennej 'DataString' do rej. ESI 
     MOV AL, 'J'					; zaladuj kod litery 'J' do rej. AH 
 Check_End: 
-    CMP BYTE PTR [ESI], 0FFFFH	; czy koniec lancucha (znak specjalny FF)? 
+    CMP BYTE PTR [ESI], 0FFH	; czy koniec lancucha (znak specjalny FF)? 
     JE Not_Find					; znaleziono znak konca (wartownik) 
-    CMP AH, [ESI]			; porownaj znak z elementem lancucha 'DataString' 
+    CMP AL, [ESI]			; porownaj znak z elementem lancucha 'DataString' 
+	;* rejest AH zamiana na AL *
     JE Got_Equal				; znaleziono znak! 
     ADD ESI, 1					; inkrementuj offset
     JMP Check_End				; petla wyszukiwania 
@@ -64,7 +65,7 @@ LocalString DB 0C3H,'AGIKSZJ', 0FFH ; definicja ciagu znakow
     MOV ESI, OFFSET LocalString ; zaladuj offset zmiennej 'LocalString' do rej. ESI 
     MOV AH, 'J'					; zaladuj kod litery 'J' do rej. AH 
 Check_End: 
-    CMP BYTE PTR [ESI], 0FFH	; czy koniec lancucha (znak specjalny FF)? 
+    CMP BYTE PTR [ESI], 0FFH	; czy koniec lancucha (znak specjalny FF)? PROBLEEEEEEEEEEEEEM
     JE Not_Find				; znaleziono znak konca (wartownik) 
     CMP AH, [ESI]			; porownaj znak z elementem lancucha 'LocalString' 
     JE Got_Equal				; znaleziono znak! 
@@ -109,6 +110,8 @@ Not_Find:
     RET							; powrot z procedury 
 Done: 
     MOV EAX,1					; znaleziono znak 
+	RET
+		;* dodano RET *
 FindChar_3 ENDP					; koniec FindChar_3 
 ;**************************************************************************** 
 ;* Procedura FindChar_4 wyszukiwania znaku 'J' w ciagu 'DataString' * 
@@ -127,7 +130,7 @@ FindChar_4 PROC NEAR			; deklaracja procedury FindChar_4
 Check_End: 
     CMP DataString[ESI], 0FFH	; czy koniec lancucha (znak specjalny FF)? 
     JE Not_Find					; znaleziono znak konca (wartownik) 
-    CMP AX, WORD PTR DataString[ESI] ; porownaj znak z elementem lancucha 'DataString' 
+    CMP AH,  DataString[ESI] ; porownaj znak z elementem lancucha 'DataString' rejest AL zamiana na AH oraz wykasowanie WORD PTR
     JE Got_Equal				; znaleziono znak! 
     ADD SI, 1					; inkrementuj indeks 
     JMP Check_End				; petla wyszukiwania 
@@ -165,6 +168,10 @@ FindChar_5 PROC NEAR
     JE Got_It					; znaleziono znak 
     CMP BYTE PTR [EBX+5], 'J'	; porownaj znak z elementem lancucha 'DataString' 
     JE Got_It					; znaleziono znak 
+	 CMP BYTE PTR [EBX+6], 'J'	; porownaj znak z elementem lancucha 'DataString' 
+    JE Got_It				; znaleziono znak 
+	;*dodano porownanie z 7mym znakiem * 
+
 Not_Find: 
     MOV EAX,0					; zaladuj znak zapytania do DL 
     RET							; powrot z procedury 
@@ -192,7 +199,8 @@ Check_End:
     CMP BYTE PTR [EBX+ESI], 0FFH; czy koniec lancucha (znak specjalny FF)? 
     JE Not_Find					; znaleziono znak konca (wartownik) 
     CMP AH, BYTE PTR [EBX+ESI]	; porownaj znak z elementem lancucha 'String' 
-    JE Not_Find					; znaleziono znak! 
+    JE Got_Equal					; znaleziono znak! 
+	;* je notfind na got ezual * 
     INC ESI						; inkrementuj indeks 
     JMP Check_End				; petla wyszukiwania 
 Got_Equal: 
@@ -229,5 +237,5 @@ ReadTime_1 PROC NEAR
     RET
 ReadTime_1 ENDP 
 ;**************************************************************************** 
-END 
 
+END DllEntry
